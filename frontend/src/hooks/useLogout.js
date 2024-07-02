@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { URL } from "../utils/constant";
+import axios from "axios";
 
 const useLogout = () => {
 	const [loading, setLoading] = useState(false);
@@ -10,14 +11,16 @@ const useLogout = () => {
 	const logout = async () => {
 		setLoading(true);
 		try {
-			const res = await fetch(`${URL}/logout`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-			});
-			const data = await res.json();
-			if (data.error) {
-				throw new Error(data.error);
-			}
+			const res = await axios.post(
+				`${URL}/logout`,
+				{},
+				{
+					headers: { "Content-Type": "application/json" },
+					withCredentials: true // Assuming you need to send cookies
+				}
+			);
+	
+			const data = res.data;
 // console.log("__+",localStorage.getItem('chat-user'))
 			localStorage.removeItem("chat-user");
 			setAuthUser(null);

@@ -5,7 +5,10 @@ const authantation = async(req,res,next)=>{
     try {
         const token = req.cookies.jwt;
         if(!token){
-            return next();
+            return res.status(404).json({
+                success: false,
+                message: "token undefined"
+            });
         }
         const decoded = jwt.verify(token,process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId).select("-password");

@@ -2,6 +2,7 @@ import  { useState } from 'react'
 import toast from 'react-hot-toast';
 import { useAuthContext } from "../context/AuthContext";
 import { URL } from '../utils/constant';
+import axios from 'axios';
 
 
 
@@ -15,25 +16,46 @@ const useSignup = () => {
        if(!success) return;
 
        setLoading(true);
-       try {
+    //    try {
 
-            const res = await fetch(`${URL}/signup`, {
-                method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ fullName, username, password, confirmPassword, gender }),
-            });
+    //         const res = await fetch(`${URL}/signup`, {
+    //             method: "POST",
+	// 			headers: { "Content-Type": "application/json" },
+	// 			body: JSON.stringify({ fullName, username, password, confirmPassword, gender }),
+    //         });
 
-            const data = await res.json();
-            console.log(data);
-			if (data.error) {
-				throw new Error(data.error);
-			}
-			localStorage.setItem("chat-user", JSON.stringify(data));
-            setAuthUser(data);
+    //         const data = await res.json();
+    //         console.log(data);
+	// 		if (data.error) {
+	// 			throw new Error(data.error);
+	// 		}
+	// 		localStorage.setItem("chat-user", JSON.stringify(data));
+    //         setAuthUser(data);
 
-       } catch (error) {
+    //    } catch (error) {
+    //     toast.error(error.message);
+    //    } 
+    try {
+        const res = await axios.post(
+            `${URL}/signup`,
+            { fullName, username, password, confirmPassword, gender },
+            {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true // Assuming you need to send cookies
+            }
+        );
+        const data = res.data;
+        console.log(data);
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        localStorage.setItem("chat-user", JSON.stringify(data));
+        setAuthUser(data);
+    } catch (error) {
         toast.error(error.message);
-       } 
+    }
        finally {
         setLoading(false);
        }

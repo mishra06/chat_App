@@ -46,38 +46,73 @@ const message = async(req,res)=>{
     }
 };
 
-const getMessages = async(req,res)=>{
+// const getMessages = async(req,res)=>{
+//     try {
+//         const { id: userToChatId } = req.params;
+//         const senderId = req.user._id;
+
+//         const conversation = await ConversationModel.findOne({
+//             participants: { $all: [senderId, userToChatId] },
+//         }).populate("messages");
+        
+//         if(!conversation){
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "No conversation found"
+//             });
+//         }
+//         const messages = await ConversationModel.messages;
+//         // console.log(messages);
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Messages fetched successfully",
+//             data: conversation.messages,
+//         });
+
+
+//     } catch{
+//         console.log("Error in getMessages controller");
+//         res.status(500).json({
+//             success: false,
+//             message: "Error getting messages"
+//         });
+//     }
+// }
+
+const getMessages = async (req, res) => {
     try {
         const { id: userToChatId } = req.params;
         const senderId = req.user._id;
 
+        // Find the conversation that includes both the sender and the user to chat with
         const conversation = await ConversationModel.findOne({
             participants: { $all: [senderId, userToChatId] },
         }).populate("messages");
-        
-        if(!conversation){
+
+        if (!conversation) {
             return res.status(404).json({
                 success: false,
-                message: "No conversation found"
+                message: "No conversation found",
             });
         }
-        const messages = await ConversationModel.messages;
 
+        // console.log("conversation.messages",conversation.messages);
         res.status(200).json({
             success: true,
             message: "Messages fetched successfully",
             data: conversation.messages,
         });
-
-
-    } catch{
-        console.log("Error in getMessages controller");
+        console.log("conversation",conversation.messages);
+    } catch (error) {
+        console.error("Error in getMessages controller:", error);
         res.status(500).json({
             success: false,
-            message: "Error getting messages"
+            message: "Error getting messages",
         });
     }
 }
+
 
 const messageController = {
     Message: errorHandler.catchAsync(message),

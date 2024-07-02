@@ -7,9 +7,13 @@ const tokenVeryfy = (userId,res)=>{
     });
 
     res.cookie("jwt",token,{
-        maxAge: 10 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite:"strict",
+        // maxAge: 10 * 24 * 60 * 60 * 1000,
+        // httpOnly: true,
+        // sameSite:"strict",
+        maxAge: 15 * 24 * 60 * 60 * 1000,  //ms
+        sameSite: 'none',
+        secure: true,
+        path: '/',
     })
     
 };

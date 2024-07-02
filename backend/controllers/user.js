@@ -6,10 +6,7 @@ const getuser = async(req,res)=>{
         
         const loggedInUserId = req.user?._id;
 
-        console.log(loggedInUserId,"logged in user");
-
         const filteredUsers = await userModel.find({ _id:{ $ne:loggedInUserId }}).select(" -password");
-        console.log("filter user " , filteredUsers);
 
         res.status(200).json({
             success: true,

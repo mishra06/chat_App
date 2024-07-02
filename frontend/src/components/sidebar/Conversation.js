@@ -3,7 +3,7 @@ import useConversation from "../../zustand/useConversation"
 
 const Conversation = ({ conversation, lastIdx, emoji }) => {
 
-	console.log("conversation", conversation);
+	// console.log("conversation", conversation);
 
 	const { selectedConversation, setSelectedConversation } = useConversation();
 
