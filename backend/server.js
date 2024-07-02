@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
@@ -6,6 +7,10 @@ dotenv.config();
 const PORT = process.env.PORT;
 const server = express();
 server.use(express.json());
+
+server.use(cors());
+
+
 
 const authRouter = require("./routes/auth");
 const messageRouter = require("./routes/message");

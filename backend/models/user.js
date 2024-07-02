@@ -5,12 +5,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    userName:{
-        type: String,
-        required: true,
-        unique: true
-    },
-    email:{
+    username:{
         type: String,
         required: true,
         unique: true
@@ -18,12 +13,12 @@ const userSchema = new mongoose.Schema({
     gender:{
         type: String,
         required:true,
-        enum:['male','female','other']
+        enum:['male','female']
     },
     password:{
         type: String,
         required: true,
-        MIDIInput:8
+        minlength: 8,
     },
     profilePic:{
         type: String,

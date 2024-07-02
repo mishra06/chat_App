@@ -9,9 +9,15 @@ const signUp = async(req,res)=>{
     try {
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(req.body.password, salt);
-        const {fullName , email , userName , password , gender} = req.body;
+        const {fullName , username , password , confirmPassword , gender} = req.body;
+        console.log(req.body);
 
-        const user = await UserModel.findOne({userName});
+        if (password !== confirmPassword) {
+			return res.status(400).json({ error: "Passwords don't match" });
+		}
+
+        const user = await UserModel.findOne({username});
+
         if(user){
             return res.status(400).json({
                 success:false,
@@ -19,17 +25,18 @@ const signUp = async(req,res)=>{
             })
         }
 
-        const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${userName}`;
-        const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${userName}`;
+        const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+        const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
         const newUser = new UserModel({
             fullName,
-            email,
-            userName,
+            username,
             password: hash,
             gender,
             profilePic: gender === "male"? boyProfilePic : girlProfilePic
         });
+
+        console.log(newUser);
 
         if(newUser){
             tokenVeryfy(newUser._id,res);
@@ -44,7 +51,7 @@ const signUp = async(req,res)=>{
         else{
             res.status(400).json({
                 success:false,
-                message:"Error creating user",
+                message:"Error creating newUser",
             });
         }
 
@@ -58,43 +65,78 @@ const signUp = async(req,res)=>{
     }
 
 };
+// const login = async(req,res)=>{
+//     try {
+//         const {username, password} = req.body;
+//         const user = await UserModel.findOne({username});
+//         if(!user){
+//             return res.status(404).json({
+//                 success:false,
+//                 message:"User not found"
+//             })
+//         }
+
+//         const isMatch = bcrypt.compareSync(req.body.password,user.password);
+//         if(isMatch){
+//             tokenVeryfy(user._id,res);
+//             res.status(200).json({
+//                 success:true,
+//                 message:"login Successfully",
+//                 id:user._id,
+//             })
+//         }
+//         else{
+//             res.status(404).json({
+//                 success:false,
+//                 message:"Invalid username or password"
+//             })
+//         }
+//     } catch (error) {
+//         console.log("error:"+ error.message)
+//         res.statue(404).json({
+//             success:false
+//         })
+//     }
+// };
+
+
 const login = async(req,res)=>{
     try {
-        const {email} = req.body;
-        const user = await UserModel.findOne({email:email});
-        if(!user){
-            return res.status(404).json({
-                success:false,
-                message:"User not found"
-            })
+        const { username , password } = req.body;
+        const user = await UserModel.findOne({ username });
+        const isMatch = await bcrypt.compare(password, user?.password || "");
+
+        if([username, isMatch].some((field)=> typeof field === "string" && field.trim()==='')){
+            return res.status(400).json({
+                success: false,
+                message: "Please fill all fields"
+            });
         }
 
-        const isMatch = bcrypt.compareSync(req.body.password,user.password);
-        if(isMatch){
-            tokenVeryfy(user._id,res);
-            res.status(200).json({
-                success:true,
-                message:"login Successfully",
-                id:user._id,
-            })
+        if(!user || !isMatch){
+            return res.status(401).json({
+                success: false,
+                message: "Invalid username or password"
+            });
         }
-        else{
-            res.status(404).json({
-                success:false,
-                message:"Password mismatch"
-            })
-        }
+
+        tokenVeryfy(user._id,res);
+
+        res.status(200).json({
+            success: true,
+            message: "Login Successful",
+            userID: user._id
+        });
     } catch (error) {
-        console.log("error:"+ error.message)
-        res.statue(404).json({
-            success:false
-        })
+        console.log("Error in login controller", error.message);
+		res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 const logout = async(req,res)=>{
     try {
         res.cookie("jwt","",{maxAge:0});
-        res.status(500).json({
+        res.status(200).json({
             success:true,
             message:"logout successfully"
         })
