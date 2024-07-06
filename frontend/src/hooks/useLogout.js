@@ -16,12 +16,16 @@ const useLogout = () => {
 				{},
 				{
 					headers: { "Content-Type": "application/json" },
-					withCredentials: true // Assuming you need to send cookies
+					// withCredentials: true // Assuming you need to send cookies
 				}
 			);
 	
 			const data = res.data;
-// console.log("__+",localStorage.getItem('chat-user'))
+
+			if (data.error) {
+				throw new Error(data.error);
+			}
+
 			localStorage.removeItem("chat-user");
 			setAuthUser(null);
 		} catch (error) {

@@ -16,25 +16,6 @@ const useSignup = () => {
        if(!success) return;
 
        setLoading(true);
-    //    try {
-
-    //         const res = await fetch(`${URL}/signup`, {
-    //             method: "POST",
-	// 			headers: { "Content-Type": "application/json" },
-	// 			body: JSON.stringify({ fullName, username, password, confirmPassword, gender }),
-    //         });
-
-    //         const data = await res.json();
-    //         console.log(data);
-	// 		if (data.error) {
-	// 			throw new Error(data.error);
-	// 		}
-	// 		localStorage.setItem("chat-user", JSON.stringify(data));
-    //         setAuthUser(data);
-
-    //    } catch (error) {
-    //     toast.error(error.message);
-    //    } 
     try {
         const res = await axios.post(
             `${URL}/signup`,
@@ -45,7 +26,7 @@ const useSignup = () => {
             }
         );
         const data = res.data;
-        console.log(data);
+        console.log(data,"signup");
 
         if (data.error) {
             throw new Error(data.error);

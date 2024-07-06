@@ -59,9 +59,9 @@ const signUp = async(req,res)=>{
         console.log("Error creating");
         res.json({
             success: false,
-            message: "Error creating user",
+            message: "Internal Server Error",
             error: error.message
-        })
+        });
     }
 
 };
@@ -98,7 +98,7 @@ const signUp = async(req,res)=>{
 //         })
 //     }
 // };
-
+ 
 
 const login = async(req,res)=>{
     try {
@@ -114,7 +114,7 @@ const login = async(req,res)=>{
         }
 
         if(!user || !isMatch){
-            return res.status(401).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid username or password"
             });
@@ -125,7 +125,8 @@ const login = async(req,res)=>{
         res.status(200).json({
             success: true,
             message: "Login Successful",
-            id: user._id
+            id: user._id,
+            data:user
         });
     } catch (error) {
         console.log("Error in login controller", error.message);

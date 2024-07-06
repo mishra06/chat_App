@@ -5,13 +5,14 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 dotenv.config();
 const PORT = process.env.PORT;
-const server = express();
-server.use(express.json());
+// const server = express();
+const { app , server } =require("./socket/socket");
+app.use(express.json());
 const authRouter = require("./routes/auth");
 const messageRouter = require("./routes/message");
 const userRouter = require("./routes/user");
 
-// server.use(cors());
+// app.use(cors());
 
 mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log("Database connected succesfully"))
@@ -22,13 +23,13 @@ const corsOptions = {
     credentials:true
   }
   
-server.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
-server.use(cookieParser());
+app.use(cookieParser());
 
-server.use("/api/auth",authRouter);
-server.use("/api/message",messageRouter);
-server.use("/api/users",userRouter);
+app.use("/api/auth",authRouter);
+app.use("/api/message",messageRouter);
+app.use("/api/users",userRouter);
 
 server.listen(PORT,()=>{
     console.log(`server is running on port ${PORT}`);

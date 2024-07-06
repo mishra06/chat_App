@@ -1,6 +1,8 @@
 const errorHandler = require("../middleware/errorHandler");
 const MessageModel = require("../models/messageModel");
 const ConversationModel = require("../models/convertationModel");
+const { getReceiverSocketId, io } = require("../socket/socket");
+// const conversationModel = require("../models/convertationModel");
 
 const message = async(req,res)=>{
     try {
@@ -15,26 +17,30 @@ const message = async(req,res)=>{
         if (!conversation) {
             conversation = await ConversationModel.create({
                 participants :[senderId , receiverId],
-            })
+            });
         }
 
-        const newMessage = await MessageModel({
+        const newMessage = new MessageModel({
             senderId,
             receiverId,
             message,
-            conversationId: conversation._id,
+            
         });
 
         if(newMessage){
          conversation.messages.push(newMessage._id);   
         }
-
         await Promise.all([conversation.save(), newMessage.save()]);
 
-        res.status(200).json({
-            success: true,
-            message: "Message sent successfully",
-            data: newMessage,
+        const receiverSocketId = getReceiverSocketId(receiverId);
+
+        if(receiverSocketId){
+            // Broadcast the new message to the receiver's socket
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
+
+        res.status(201).json({
+            message: newMessage
         });
 
     } catch (error) {
@@ -46,72 +52,51 @@ const message = async(req,res)=>{
     }
 };
 
-// const getMessages = async(req,res)=>{
+
+
+// const getMessages = async (req, res) => {
 //     try {
-//         const { id: userToChatId } = req.params;
-//         const senderId = req.user._id;
+// 		const { id: userToChatId } = req.params;
+// 		const senderId = req.user._id;
 
-//         const conversation = await ConversationModel.findOne({
-//             participants: { $all: [senderId, userToChatId] },
-//         }).populate("messages");
-        
-//         if(!conversation){
-//             return res.status(404).json({
-//                 success: false,
-//                 message: "No conversation found"
-//             });
-//         }
-//         const messages = await ConversationModel.messages;
-//         // console.log(messages);
+// 		const conversation = await ConversationModel.findOne({
+// 			participants: { $all: [senderId, userToChatId] },
+// 		}).populate("messages"); // NOT REFERENCE BUT ACTUAL MESSAGES
 
-//         res.status(200).json({
-//             success: true,
-//             message: "Messages fetched successfully",
-//             data: conversation.messages,
-//         });
+// 		if (!conversation) return res.status(404).json([]);
 
+// 		const messages = conversation.messages;
 
-//     } catch{
-//         console.log("Error in getMessages controller");
-//         res.status(500).json({
-//             success: false,
-//             message: "Error getting messages"
-//         });
-//     }
+// 		res.status(200).json(messages);
+// 	} catch (error) {
+// 		console.log("Error in getMessages controller: ", error.message);
+// 		res.status(500).json({ error: "Internal server error" });
+// 	}
 // }
 
 const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
-        const senderId = req.user._id;
-
-        // Find the conversation that includes both the sender and the user to chat with
-        const conversation = await ConversationModel.findOne({
-            participants: { $all: [senderId, userToChatId] },
-        }).populate("messages");
-
-        if (!conversation) {
-            return res.status(404).json({
-                success: false,
-                message: "No conversation found",
-            });
-        }
-
-        // console.log("conversation.messages",conversation.messages);
-        res.status(200).json({
-            success: true,
-            message: "Messages fetched successfully",
-            data: conversation.messages,
-        });
-        console.log("conversation",conversation.messages);
+      const { id: userToChatId } = req.params;
+      const senderId = req.user._id;
+  
+      const conversation = await ConversationModel.findOne({
+        participants: { $all: [senderId, userToChatId] },
+      }).populate('messages');
+  
+      if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found' });
+      }
+        
+      const messages = conversation.messages;
+      res.status(200).json({
+            success:true,
+            message:messages
+      });
     } catch (error) {
-        console.error("Error in getMessages controller:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error getting messages",
-        });
+      console.error('Error in getMessages controller:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-}
+  };
 
 
 const messageController = {
@@ -120,3 +105,6 @@ const messageController = {
 }
 
 module.exports = messageController;
+
+
+// conversationId: conversation._id,
