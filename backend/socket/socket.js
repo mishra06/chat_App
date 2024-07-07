@@ -7,11 +7,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server,{
     cors:{
-        origin:["http://localhost:3000"],
+        origin:["http://localhost:3000","https://chat-app-icqy.onrender.com"],
         methods:["GET","POST"],
         credentials:true
     },
 });
+
+// app.use(cors(corsOptions));
 
 const getReceiverSocketId = (receiverId) => {
 	return userSocketMap[receiverId];
