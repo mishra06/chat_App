@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGO_URL)
 .catch((err)=> console.log(`Error in DB connection ${err}`));
 
 const corsOptions = {
-    origin:["http://localhost:3000","https://chat-app-icqy.onrender.com"],
+    origin:["http://localhost:3000","https://chat-app-theta-smoky.vercel.app"],
     credentials:true
   }
   
