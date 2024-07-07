@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const tokenVeryfy = (userId,res)=>{
     const token = jwt.sign({userId}, process.env.JWT_SECRET,{
-        expiresIn: "10d",
+        exp: new Date().getTime() + 3600 * 1000,
     });
 
     res.cookie("jwt",token,{
